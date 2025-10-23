@@ -1,22 +1,23 @@
-# Use Eclipse Temurin with Java 21 as the base image
-FROM eclipse-temurin:21
+# syntax=docker/dockerfile:1.4
 
-# Define version
-ARG VERSION
+FROM eclipse-temurin:21-jre AS base
 
-# Set the working directory inside the container
+ARG VERSION=0.0.1-SNAPSHOT
+ARG IMPLEMENTATION=netty
+ARG PORT=50051
+ARG DIST_TAR=helidon-vs-netty-benchmark-capacity-${VERSION}.tar
+
+ENV VERSION=${VERSION} \
+    IMPLEMENTATION=${IMPLEMENTATION} \
+    PORT=${PORT}
+
 WORKDIR /app
 
-# Copy Distribution TAR file
-COPY --from=distributions helidon-pbj-capacity-test-2-${VERSION}.tar .
+COPY build/distributions/${DIST_TAR} /tmp/${DIST_TAR}
+RUN tar -xf /tmp/${DIST_TAR} -C /app \
+    && mv "helidon-vs-netty-benchmark-capacity-${VERSION}" runtime \
+    && rm /tmp/${DIST_TAR}
 
-# Extract the TAR file
-RUN tar -xvf helidon-pbj-capacity-test-2-${VERSION}.tar
+EXPOSE ${PORT}
 
-# Expose the port that the application will run on
-EXPOSE 8082
-
-# RUN the bin script for starting the server
-ENTRYPOINT ["sh", "-c", "/app/helidon-pbj-capacity-test-2-1.0-SNAPSHOT/bin/helidon-pbj-capacity-test-2"]
-
-
+ENTRYPOINT ["sh","-c","/app/runtime/bin/helidon-vs-netty-benchmark-capacity server ${IMPLEMENTATION} ${PORT}"]

@@ -1,16 +1,26 @@
-version: "3.9"
 services:
-  app:
-    # Either build from local Dockerfile OR use a prebuilt image by setting IMAGE_REPO and IMAGE_TAG in env
+  netty-server:
     build:
-      context: .
-      dockerfile: Dockerfile
-    image: helidon-pbj-capacity-test-2:1.0-SNAPSHOT
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        VERSION: "0.0.1-SNAPSHOT"
+        IMPLEMENTATION: netty
+        PORT: 50051
+    image: helidon-vs-netty-benchmark:0.0.1-SNAPSHOT-netty
     ports:
-      - "9083:8083"            # change if your app uses another port
-    environment:
-      TZ: "UTC"
-      # Prefer JAVA_TOOL_OPTIONS so you can tweak without editing Dockerfile
-      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
-      # Add your app envs here, e.g. DB_URL, API_KEY, etc.
+      - "50051:50051"
+    restart: unless-stopped
+
+  helidon-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        VERSION: "0.0.1-SNAPSHOT"
+        IMPLEMENTATION: helidon
+        PORT: 50052
+    image: helidon-vs-netty-benchmark:0.0.1-SNAPSHOT-helidon
+    ports:
+      - "50052:50052"
     restart: unless-stopped

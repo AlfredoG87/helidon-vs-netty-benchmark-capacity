@@ -17,6 +17,15 @@ The suite can run entirely in a single JVM (baseline) or with the servers hosted
 
 # in another terminal, run a Helidon client against that server
 ./gradlew run --args="client helidon localhost:50051 1000 64"
+
+# start a Helidon server on port 50052
+./gradlew run --args="server helidon 50052"
+
+# drive it with the Netty client (host:port form)
+./gradlew run --args="client netty localhost:50052 500 128"
+
+# or using an HTTP URL when targeting Helidon
+./gradlew run --args="client netty http://localhost:50052 500 128"
 ```
 
 Usage (from the CLI help):
@@ -51,6 +60,26 @@ protected static final int SIZE_1MB = 1 * 1024 * 1024;
 Change these values to customize the workloads; every combination (Netty ↔ Helidon × 500KB/1MB) will pick up the new settings automatically.
 
 If you’d like to add more payload variants, adjust the `combinations()` stream in the same class.
+
+---
+
+## Docker Images & Compose
+
+To run the benchmark servers inside containers outside the test harness:
+
+```bash
+# 1. Build the distribution if you haven’t already
+./gradlew distTar
+
+# 2. Build images for the desired implementation (netty or helidon)
+./docker/build.sh 0.0.1-SNAPSHOT netty
+./docker/build.sh 0.0.1-SNAPSHOT helidon
+
+# 3. (Optional) spin them up via docker compose
+docker compose -f docker/docker-compose.yaml up --build
+```
+
+The compose file publishes Netty on `50051` and Helidon on `50052`. You can then point the local clients at `localhost:<port>` manually or through the integration test with `-PincludeDocker`.
 
 ---
 
