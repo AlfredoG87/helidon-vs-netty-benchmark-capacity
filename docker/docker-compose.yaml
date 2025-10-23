@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  app:
+    # Either build from local Dockerfile OR use a prebuilt image by setting IMAGE_REPO and IMAGE_TAG in env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: helidon-pbj-capacity-test-2:1.0-SNAPSHOT
+    ports:
+      - "9083:8083"            # change if your app uses another port
+    environment:
+      TZ: "UTC"
+      # Prefer JAVA_TOOL_OPTIONS so you can tweak without editing Dockerfile
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+      # Add your app envs here, e.g. DB_URL, API_KEY, etc.
+    restart: unless-stopped

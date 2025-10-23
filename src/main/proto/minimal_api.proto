@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package throughput.v1;
+
+// Java options (tweak as you like)
+option java_multiple_files = true;
+option java_package = "org.example.throughput";
+option java_outer_classname = "ThroughputProto";
+
+// A single data unit to measure throughput.
+// The client controls payload size.
+message DataChunk {
+  // Monotonic message number chosen by the client (0..N).
+  // Use uint64 so you won't run out during long tests.
+  uint64 seq = 1;
+
+  // The bytes to transmit. Size is fully client-configurable.
+  bytes payload = 2;
+}
+
+// Server acknowledges each received chunk.
+message Ack {
+  // The seq that this ACK corresponds to.
+  uint64 seq = 1;
+
+  // True when the server has fully received (and optionally processed) the chunk.
+  bool ok = 2;
+}
+
+// Bidirectional streaming: client sends DataChunk stream,
+// server replies with an Ack stream (one ack per chunk).
+service ThroughputService {
+  rpc Stream (stream DataChunk) returns (stream Ack);
+}
