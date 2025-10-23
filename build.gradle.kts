@@ -43,12 +43,19 @@ dependencies {
     // --- Test ---
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.1")
+    testImplementation("org.testcontainers:testcontainers:1.20.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }
 
 tasks.test {
-    useJUnitPlatform()
+    dependsOn("installDist")
+    useJUnitPlatform {
+        if (!project.hasProperty("includeDocker")) {
+            excludeTags("docker")
+        }
+    }
     testLogging {
         showStandardStreams = true
     }

@@ -34,7 +34,7 @@ final class ClientRunner {
         AtomicLong lastTime = new AtomicLong(System.nanoTime());
         AtomicReference<Throwable> error = new AtomicReference<>();
 
-        int maxInFlight = Math.max(1, (int) Math.min(32, (32L * 1024 * 1024) / Math.max(1, sizeBytes)));
+        int maxInFlight = Math.max(1, (int) Math.min(4, (32L * 1024 * 1024) / Math.max(1, sizeBytes)));
         Semaphore inFlight = new Semaphore(maxInFlight);
 
         ScheduledExecutorService reporter = Executors.newSingleThreadScheduledExecutor(r -> {
