@@ -87,43 +87,43 @@ The compose file publishes Netty on `50051` and Helidon on `50052`. You can then
 
 Each run prints per-side summaries and an aggregated table. Below are captured summaries for both scenarios using the default payloads (1 000 messages × 500 KB and 1 000 messages × 1 MB).
 
-### Local JVM Servers
+### Local JVM Servers (sample run)
 
 ```
 ══════════════════════════════════════════════════════════════
  Integration test throughput summary (local JVM servers)
    server   client   payloadKB   messages   duration(s)   MB/s
 --------------------------------------------------------------
-   NETTY    NETTY      500.0       1000        0.538   907.76
-   NETTY    NETTY     1024.0       1000        0.558  1792.60
-   NETTY  HELIDON      500.0       1000        0.862   566.69
-   NETTY  HELIDON     1024.0       1000        0.784  1275.43
- HELIDON    NETTY      500.0       1000        0.782   624.40
- HELIDON    NETTY     1024.0       1000        1.521   657.49
- HELIDON  HELIDON      500.0       1000        0.808   604.47
- HELIDON  HELIDON     1024.0       1000        1.668   599.41
+   NETTY    NETTY      500.0       1000        0.549   890.04
+   NETTY    NETTY     1024.0       1000        0.538  1859.22
+   NETTY  HELIDON      500.0       1000        0.792   616.17
+   NETTY  HELIDON     1024.0       1000        0.887  1127.74
+ HELIDON    NETTY      500.0       1000        0.802   609.14
+ HELIDON    NETTY     1024.0       1000        1.520   657.74
+ HELIDON  HELIDON      500.0       1000        0.712   685.87
+ HELIDON  HELIDON     1024.0       1000        1.589   629.14
 ══════════════════════════════════════════════════════════════
 ```
 
-### Servers in Docker Containers
+### Servers in Docker Containers (sample run)
 
 ```
 ══════════════════════════════════════════════════════════════
  Integration test throughput summary (servers in Docker containers)
    server   client   payloadKB   messages   duration(s)   MB/s
 --------------------------------------------------------------
-   NETTY    NETTY      500.0       1000        1.267   385.29
-   NETTY    NETTY     1024.0       1000        1.677   596.43
-   NETTY  HELIDON      500.0       1000        3.016   161.89
-   NETTY  HELIDON     1024.0       1000        6.050   165.30
- HELIDON    NETTY      500.0       1000       62.026     7.87
- HELIDON    NETTY     1024.0       1000      166.324     6.29
- HELIDON  HELIDON      500.0       1000        6.037   160.38
- HELIDON  HELIDON     1024.0       1000        6.678   148.31
+   NETTY    NETTY      500.0       1000        1.248   391.23
+   NETTY    NETTY     1024.0       1000        1.510   662.11
+   NETTY  HELIDON      500.0       1000        1.288   379.09
+   NETTY  HELIDON     1024.0       1000        1.601   624.61
+ HELIDON    NETTY      500.0       1000      119.379     4.09
+ HELIDON    NETTY     1024.0       1000      109.930     9.10
+ HELIDON  HELIDON      500.0       1000       89.173     5.48
+ HELIDON  HELIDON     1024.0       1000      176.276     5.67
 ══════════════════════════════════════════════════════════════
 ```
 
-These results highlight the significant regressions observed when Helidon serves traffic across a docker/network boundary (Helidon server ↔ Netty client drops to single-digit MB/s).
+Actual values fluctuate with hardware, Docker networking mode, and JVM headroom, but the relative regression (Helidon server dropping from ~600 MB/s locally to single-digit MB/s over a bridge network) has been consistent across runs.
 
 ---
 
