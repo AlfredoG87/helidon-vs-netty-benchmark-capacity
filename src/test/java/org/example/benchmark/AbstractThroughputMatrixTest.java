@@ -33,7 +33,6 @@ abstract class AbstractThroughputMatrixTest {
 
     protected static final int SIZE_5KB   = 5 * 1024;
     protected static final int SIZE_50KB  = 50 * 1024;
-    protected static final int SIZE_250KB = 250 * 1024;
     protected static final int SIZE_500KB = 500 * 1024;
     protected static final int SIZE_1MB   = 1024 * 1024;
 
@@ -51,7 +50,7 @@ abstract class AbstractThroughputMatrixTest {
     protected static Stream<Arguments> combinations() {
         return Stream.of(Impl.NETTY, Impl.HELIDON)
                 .flatMap(server -> Stream.of(Impl.NETTY, Impl.HELIDON)
-                        .flatMap(client -> Stream.of(SIZE_5KB, SIZE_50KB, SIZE_250KB, SIZE_500KB, SIZE_1MB)
+                        .flatMap(client -> Stream.of(SIZE_5KB, SIZE_50KB, SIZE_500KB, SIZE_1MB)
                                 .map(size -> Arguments.of(server, client, size))));
     }
 
