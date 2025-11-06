@@ -50,7 +50,7 @@ abstract class AbstractThroughputMatrixTest {
 
     protected static Stream<Arguments> combinations() {
         return Stream.of(Impl.NETTY, Impl.HELIDON)
-                .flatMap(server -> Stream.of(Impl.NETTY) // , Impl.HELIDON)
+                .flatMap(server -> Stream.of(Impl.NETTY, Impl.HELIDON)
                         .flatMap(client -> Stream.of(SIZE_5KB, SIZE_50KB, SIZE_250KB, SIZE_500KB, SIZE_1MB)
                                 .map(size -> Arguments.of(server, client, size))));
     }
