@@ -17,6 +17,7 @@ application {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 val grpcVersion = "1.66.0"          // keep consistent across plugins + deps
@@ -34,11 +35,18 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:$protocVersion")
 
     // helidon server
-    implementation("io.helidon.webserver:helidon-webserver:4.3.1")
-    implementation("io.helidon.webserver:helidon-webserver-grpc:4.3.1")
+    // implementation("io.helidon.webserver:helidon-webserver:4.3.1")
+    // implementation("io.helidon.webserver:helidon-webserver-grpc:4.3.1")
     // helion client
-    implementation("io.helidon.webclient:helidon-webclient-grpc:4.3.1")
-    implementation("io.helidon.webclient:helidon-webclient-http2:4.3.1")
+    // implementation("io.helidon.webclient:helidon-webclient-grpc:4.3.1")
+    // implementation("io.helidon.webclient:helidon-webclient-http2:4.3.1")
+
+    // helidon server
+    implementation("io.helidon.webserver:helidon-webserver:4.3.0-SNAPSHOT")
+    implementation("io.helidon.webserver:helidon-webserver-grpc:4.3.0-SNAPSHOT")
+    // helion client
+    implementation("io.helidon.webclient:helidon-webclient-grpc:4.3.0-SNAPSHOT")
+    implementation("io.helidon.webclient:helidon-webclient-http2:4.3.0-SNAPSHOT")
 
     // --- Test ---
     testImplementation(platform("org.junit:junit-bom:5.10.0"))

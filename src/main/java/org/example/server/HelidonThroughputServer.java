@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.example.server;
 
-import io.grpc.ServerServiceDefinition;
-import io.helidon.webserver.WebServer;
-import io.helidon.webserver.grpc.GrpcRouting;
-import org.example.throughput.ThroughputServiceGrpc;
-
 import java.time.Duration;
+
+import io.helidon.webserver.WebServer;
+import io.helidon.webserver.grpc.GrpcConfig;
+import io.helidon.webserver.grpc.GrpcRouting;
+import io.helidon.webserver.http2.Http2Config;
+
+import io.grpc.ServerServiceDefinition;
+import org.example.throughput.ThroughputServiceGrpc;
 
 public final class HelidonThroughputServer implements ThroughputServer {
     private final int port;
@@ -22,6 +25,17 @@ public final class HelidonThroughputServer implements ThroughputServer {
         GrpcRouting.Builder grpc = GrpcRouting.builder().service(ssd);
         server = WebServer.builder()
                 .port(port)
+                .connectionOptions(b -> b.tcpNoDelay(true))
+                .backlog(8 * 1024)
+                .writeQueueLength(8 * 1024)
+                .addProtocol(GrpcConfig.builder()
+                                     .enableCompression(false)
+                                     .enableMetrics(false)
+                                     .build())
+                .addProtocol(Http2Config.builder()
+                                     .initialWindowSize(2 * 1024 * 1024)
+                                     .maxFrameSize(2 * 1024 * 1024)
+                                     .build())
                 .addRouting(grpc)
                 .build();
         server.start();
