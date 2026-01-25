@@ -127,6 +127,20 @@ Actual values fluctuate with hardware, Docker networking mode, and JVM headroom,
 
 ---
 
+## Library Versions
+
+This benchmark uses the following library versions (as of January 2026):
+
+| Library | Version | Notes |
+|---------|---------|-------|
+| [Helidon](https://helidon.io/) | 4.3.2 | Latest stable release requiring Java 21+ |
+| [Netty](https://netty.io/) | 4.2.9.Final | Via grpc-netty-shaded |
+| [gRPC-Java](https://grpc.io/) | 1.78.0 | HTTP/2 based RPC framework |
+
+> **Note**: Actual versions used in this project are defined in `build.gradle.kts`. Update the `grpcVersion` variable and Helidon dependency versions there to change library versions.
+
+---
+
 ## Notes
 
 - Docker tests require a running Docker daemon and will pull the `eclipse-temurin:21` base image if not present.
