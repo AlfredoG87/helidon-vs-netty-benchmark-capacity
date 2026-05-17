@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: benchmark-client              # overridden per run: benchmark-client-<uuid>
+  namespace: benchmark
+  labels:
+    app: benchmark-client
+spec:
+  backoffLimit: 0                     # no retries — chaos failures must surface clearly
+  ttlSecondsAfterFinished: 300        # auto-cleanup after 5 minutes
+  template:
+    metadata:
+      labels:
+        app: benchmark-client
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: client
+          image: helidon-vs-netty-benchmark:0.0.1-SNAPSHOT-netty
+          imagePullPolicy: Never
+          env:
+            - name: MODE
+              value: "client"
+            - name: CLIENT_IMPL
+              value: "netty"          # netty | helidon
+            - name: SERVER_HOST
+              value: "netty-server:50051"   # in-cluster DNS; helidon client needs http:// prefix
+            - name: NUM_MESSAGES
+              value: "1000"
+            - name: PAYLOAD_KB
+              value: "1024"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2"

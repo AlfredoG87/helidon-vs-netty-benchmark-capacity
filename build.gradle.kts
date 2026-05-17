@@ -35,26 +35,26 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:$protocVersion")
 
     // helidon server
-    // implementation("io.helidon.webserver:helidon-webserver:4.3.1")
-    // implementation("io.helidon.webserver:helidon-webserver-grpc:4.3.1")
-    // helion client
-    // implementation("io.helidon.webclient:helidon-webclient-grpc:4.3.1")
-    // implementation("io.helidon.webclient:helidon-webclient-http2:4.3.1")
-
-    // helidon server
-    implementation("io.helidon.webserver:helidon-webserver:4.3.0-SNAPSHOT")
-    implementation("io.helidon.webserver:helidon-webserver-grpc:4.3.0-SNAPSHOT")
-    // helion client
-    implementation("io.helidon.webclient:helidon-webclient-grpc:4.3.0-SNAPSHOT")
-    implementation("io.helidon.webclient:helidon-webclient-http2:4.3.0-SNAPSHOT")
+    implementation("io.helidon.webserver:helidon-webserver:4.4.1")
+    implementation("io.helidon.webserver:helidon-webserver-grpc:4.4.1")
+    // helidon client
+    implementation("io.helidon.webclient:helidon-webclient-grpc:4.4.1")
+    implementation("io.helidon.webclient:helidon-webclient-http2:4.4.1")
 
     // --- Test ---
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.1")
-    testImplementation("org.testcontainers:testcontainers:1.20.1")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.3")
+    testImplementation("org.testcontainers:testcontainers:1.21.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.slf4j:slf4j-simple:1.7.36")
 
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 tasks.test {
@@ -63,10 +63,21 @@ tasks.test {
         if (!project.hasProperty("includeDocker")) {
             excludeTags("docker")
         }
+        if (!project.hasProperty("includeKind")) {
+            excludeTags("kind")
+        }
+        if (!project.hasProperty("includeChaos")) {
+            excludeTags("chaos")
+        }
     }
     testLogging {
         showStandardStreams = true
     }
+    // Forward chaos.* system properties set on the Gradle command line to the test JVM
+    System.getProperties()
+        .keys.map { it.toString() }
+        .filter { it.startsWith("chaos.") }
+        .forEach { key -> systemProperty(key, System.getProperty(key)) }
     minHeapSize = "1g"
     maxHeapSize = "4g"
     jvmArgs(

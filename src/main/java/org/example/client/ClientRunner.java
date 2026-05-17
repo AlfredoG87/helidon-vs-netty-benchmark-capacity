@@ -2,8 +2,11 @@
 package org.example.client;
 
 import com.google.protobuf.ByteString;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.example.common.Pretty;
+
+import java.util.Locale;
 import org.example.throughput.Ack;
 import org.example.throughput.DataChunk;
 import org.example.throughput.ThroughputServiceGrpc;
@@ -96,18 +99,34 @@ final class ClientRunner {
         if (error.get() == null) {
             in.onCompleted();
         }
-        done.await(120, TimeUnit.SECONDS);
+        boolean finished = done.await(120, TimeUnit.SECONDS);
+        if (!finished) {
+            error.compareAndSet(null, new RuntimeException("Stream timed out after 120s"));
+        }
 
+        double sec = (System.nanoTime() - startedNs) / 1_000_000_000.0;
+        long delivered = totalAcks.get();
         Throwable err = error.get();
+
+        Pretty.summary("client", implName, err == null ? numMsg : delivered,
+                sizeBytes, delivered * (long) sizeBytes, sec);
+        Pretty.resultLine(delivered, numMsg, sizeBytes, sec, classifyError(err));
+
         if (err != null) {
             if (err instanceof RuntimeException re) {
                 throw re;
             }
             throw new RuntimeException("gRPC stream failed", err);
         }
+    }
 
-        double sec = (System.nanoTime() - startedNs) / 1_000_000_000.0;
-        long deliveredBytes = totalAcks.get() * (long) sizeBytes;
-        Pretty.summary("client", implName, numMsg, sizeBytes, deliveredBytes, sec);
+    private static String classifyError(Throwable t) {
+        if (t == null) {
+            return null;
+        }
+        if (t instanceof StatusRuntimeException sre) {
+            return sre.getStatus().getCode().name();
+        }
+        return t.getClass().getSimpleName().toUpperCase(Locale.ROOT);
     }
 }

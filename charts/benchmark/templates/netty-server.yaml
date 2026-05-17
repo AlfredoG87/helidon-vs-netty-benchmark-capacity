@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netty-server
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: netty-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netty-server
+  template:
+    metadata:
+      labels:
+        app: netty-server
+    spec:
+      containers:
+        - name: netty-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}-netty"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MODE
+              value: "server"
+            - name: IMPLEMENTATION
+              value: "netty"
+            - name: PORT
+              value: "{{ .Values.servers.netty.port }}"
+          ports:
+            - containerPort: {{ .Values.servers.netty.port }}
+          resources:
+            {{- toYaml .Values.servers.netty.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netty-server
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: netty-server
+  ports:
+    - port: {{ .Values.servers.netty.port }}
+      targetPort: {{ .Values.servers.netty.port }}

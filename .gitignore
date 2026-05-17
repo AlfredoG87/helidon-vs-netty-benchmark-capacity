@@ -8,6 +8,9 @@ build/
 *.iws
 *.hprof
 *.bin
+.claude/*
+!.claude/commands/
+RESTORE.md
 
 !gradle/wrapper/gradle-wrapper.jar
 !/src/**

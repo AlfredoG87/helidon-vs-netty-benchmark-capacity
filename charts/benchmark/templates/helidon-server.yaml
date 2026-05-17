@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helidon-server
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: helidon-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helidon-server
+  template:
+    metadata:
+      labels:
+        app: helidon-server
+    spec:
+      containers:
+        - name: helidon-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}-helidon"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MODE
+              value: "server"
+            - name: IMPLEMENTATION
+              value: "helidon"
+            - name: PORT
+              value: "{{ .Values.servers.helidon.port }}"
+          ports:
+            - containerPort: {{ .Values.servers.helidon.port }}
+          resources:
+            {{- toYaml .Values.servers.helidon.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helidon-server
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: helidon-server
+  ports:
+    - port: {{ .Values.servers.helidon.port }}
+      targetPort: {{ .Values.servers.helidon.port }}

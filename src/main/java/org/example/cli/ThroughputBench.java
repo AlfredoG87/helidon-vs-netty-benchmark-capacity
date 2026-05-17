@@ -88,7 +88,12 @@ public final class ThroughputBench {
 
         System.out.printf("🚀 Running %s client → %s — %,d msgs of %,d bytes%n",
                 type, target, numMsg, sizeBytes);
-        client.run(numMsg, sizeBytes);
+        try {
+            client.run(numMsg, sizeBytes);
+        } catch (Exception e) {
+            // RESULT line already printed by ClientRunner — exit 0 so K8s Job logs are readable
+            System.err.println("Client stream ended with error: " + e.getMessage());
+        }
     }
 
     private static void usage() {

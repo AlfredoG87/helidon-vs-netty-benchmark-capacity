@@ -1,6 +1,4 @@
-# syntax=docker/dockerfile:1.4
-
-FROM eclipse-temurin:21-jre AS base
+FROM eclipse-temurin:25.0.2_10-jre-ubi10-minimal AS base
 
 ARG VERSION=0.0.1-SNAPSHOT
 ARG IMPLEMENTATION=netty
@@ -9,7 +7,12 @@ ARG DIST_TAR=helidon-vs-netty-benchmark-capacity-${VERSION}.tar
 
 ENV VERSION=${VERSION} \
     IMPLEMENTATION=${IMPLEMENTATION} \
-    PORT=${PORT}
+    PORT=${PORT} \
+    MODE=server \
+    CLIENT_IMPL=netty \
+    SERVER_HOST=netty-server:50051 \
+    NUM_MESSAGES=1000 \
+    PAYLOAD_KB=1024
 
 WORKDIR /app
 
@@ -20,4 +23,9 @@ RUN tar -xf /tmp/${DIST_TAR} -C /app \
 
 EXPOSE ${PORT}
 
-ENTRYPOINT ["sh","-c","/app/runtime/bin/helidon-vs-netty-benchmark-capacity server ${IMPLEMENTATION} ${PORT}"]
+ENTRYPOINT ["sh", "-c", "\
+  if [ \"$MODE\" = \"client\" ]; then \
+    exec /app/runtime/bin/helidon-vs-netty-benchmark-capacity client \"$CLIENT_IMPL\" \"$SERVER_HOST\" \"$NUM_MESSAGES\" \"$PAYLOAD_KB\"; \
+  else \
+    exec /app/runtime/bin/helidon-vs-netty-benchmark-capacity server \"$IMPLEMENTATION\" \"$PORT\"; \
+  fi"]

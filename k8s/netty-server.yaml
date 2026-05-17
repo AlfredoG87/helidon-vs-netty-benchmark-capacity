@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netty-server
+  namespace: benchmark
+  labels:
+    app: netty-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netty-server
+  template:
+    metadata:
+      labels:
+        app: netty-server
+    spec:
+      containers:
+        - name: netty-server
+          image: helidon-vs-netty-benchmark:0.0.1-SNAPSHOT-netty
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 50051
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netty-server
+  namespace: benchmark
+spec:
+  selector:
+    app: netty-server
+  ports:
+    - port: 50051
+      targetPort: 50051

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: benchmark
+description: Helidon vs Netty gRPC throughput benchmark — server infrastructure and chaos templates
+type: application
+version: 0.1.0
+appVersion: "0.0.1-SNAPSHOT"

@@ -1,0 +1,26 @@
+image:
+  repository: helidon-vs-netty-benchmark
+  tag: 0.0.1-SNAPSHOT
+  pullPolicy: Never
+
+namespace: benchmark
+
+servers:
+  netty:
+    port: 50051
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "2"
+  helidon:
+    port: 50052
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "2"

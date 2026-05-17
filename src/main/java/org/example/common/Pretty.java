@@ -32,6 +32,16 @@ public final class Pretty {
                 side, impl, elapsedSec, mbPerSec, msgs, mbThisInterval);
     }
 
+    public static void resultLine(long delivered, long attempted, int payloadBytes,
+                                  double seconds, String errorCode) {
+        long totalBytes = delivered * (long) payloadBytes;
+        double mbps = seconds > 0 ? (totalBytes / (1024.0 * 1024.0)) / seconds : 0.0;
+        System.out.printf(Locale.ROOT,
+                "RESULT mbps=%.3f delivered=%d attempted=%d payloadBytes=%d duration=%.3f error=%s%n",
+                mbps, delivered, attempted, payloadBytes, seconds,
+                errorCode != null ? errorCode : "OK");
+    }
+
     public static void summary(String side, String impl, long messages, long sizeBytes,
                                long totalBytes, double seconds) {
         double mbps = seconds > 0 ? (totalBytes / (1024.0 * 1024.0)) / seconds : 0.0;

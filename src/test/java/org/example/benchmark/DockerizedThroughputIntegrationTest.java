@@ -17,7 +17,7 @@ import java.util.Locale;
 @Tag("docker")
 class DockerizedThroughputIntegrationTest extends AbstractThroughputMatrixTest {
 
-    private static final DockerImageName BASE_IMAGE = DockerImageName.parse("eclipse-temurin:21");
+    private static final DockerImageName BASE_IMAGE = DockerImageName.parse("eclipse-temurin:25");
 
     @Override
     protected ServerHandle startServer(Impl impl) throws Exception {
