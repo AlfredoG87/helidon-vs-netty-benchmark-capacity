@@ -12,7 +12,11 @@ ENV VERSION=${VERSION} \
     CLIENT_IMPL=netty \
     SERVER_HOST=netty-server:50051 \
     NUM_MESSAGES=1000 \
-    PAYLOAD_KB=1024
+    PAYLOAD_KB=1024 \
+    STALL_CLIENT_TYPE=helidon \
+    STALL_SERVER_HOST=helidon-server:50052 \
+    STALL_MESSAGES=100 \
+    STALL_PAYLOAD_KB=4096
 
 WORKDIR /app
 
@@ -26,6 +30,8 @@ EXPOSE ${PORT}
 ENTRYPOINT ["sh", "-c", "\
   if [ \"$MODE\" = \"client\" ]; then \
     exec /app/runtime/bin/helidon-vs-netty-benchmark-capacity client \"$CLIENT_IMPL\" \"$SERVER_HOST\" \"$NUM_MESSAGES\" \"$PAYLOAD_KB\"; \
+  elif [ \"$MODE\" = \"stall\" ]; then \
+    exec /app/runtime/bin/helidon-vs-netty-benchmark-capacity stall \"$STALL_CLIENT_TYPE\" \"$STALL_SERVER_HOST\" \"$STALL_MESSAGES\" \"$STALL_PAYLOAD_KB\"; \
   else \
     exec /app/runtime/bin/helidon-vs-netty-benchmark-capacity server \"$IMPLEMENTATION\" \"$PORT\"; \
   fi"]

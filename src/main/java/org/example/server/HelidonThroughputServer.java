@@ -3,6 +3,7 @@ package org.example.server;
 
 import java.time.Duration;
 
+import io.helidon.common.Size;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.grpc.GrpcConfig;
 import io.helidon.webserver.grpc.GrpcRouting;
@@ -31,10 +32,12 @@ public final class HelidonThroughputServer implements ThroughputServer {
                 .addProtocol(GrpcConfig.builder()
                                      .enableCompression(false)
                                      .enableMetrics(false)
+                                     .maxReadBufferSize(32 * 1024 * 1024)
                                      .build())
                 .addProtocol(Http2Config.builder()
-                                     .initialWindowSize(2 * 1024 * 1024)
-                                     .maxFrameSize(2 * 1024 * 1024)
+                                     .initialWindowSize(32 * 1024 * 1024)
+                                     .maxFrameSize(8 * 1024 * 1024)
+                                     .maxBufferedEntitySize(Size.parse("128 MB"))
                                      .build())
                 .addRouting(grpc)
                 .build();

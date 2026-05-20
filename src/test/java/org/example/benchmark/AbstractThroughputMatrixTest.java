@@ -31,10 +31,13 @@ abstract class AbstractThroughputMatrixTest {
 
     protected static final long MESSAGE_COUNT = 1_000;
 
-    protected static final int SIZE_5KB   = 5 * 1024;
-    protected static final int SIZE_50KB  = 50 * 1024;
-    protected static final int SIZE_500KB = 500 * 1024;
+    protected static final int SIZE_5KB   =    5 * 1024;
+    protected static final int SIZE_50KB  =   50 * 1024;
+    protected static final int SIZE_500KB =  500 * 1024;
     protected static final int SIZE_1MB   = 1024 * 1024;
+    protected static final int SIZE_2MB   = 2048 * 1024;
+    protected static final int SIZE_4MB   = 4096 * 1024;
+    protected static final int SIZE_8MB   = 8192 * 1024;
 
     private final List<Result> results = Collections.synchronizedList(new ArrayList<>());
 
@@ -50,7 +53,8 @@ abstract class AbstractThroughputMatrixTest {
     protected static Stream<Arguments> combinations() {
         return Stream.of(Impl.NETTY, Impl.HELIDON)
                 .flatMap(server -> Stream.of(Impl.NETTY, Impl.HELIDON)
-                        .flatMap(client -> Stream.of(SIZE_5KB, SIZE_50KB, SIZE_500KB, SIZE_1MB)
+                        .flatMap(client -> Stream.of(
+                                        SIZE_5KB, SIZE_50KB, SIZE_500KB, SIZE_1MB, SIZE_2MB, SIZE_4MB, SIZE_8MB)
                                 .map(size -> Arguments.of(server, client, size))));
     }
 

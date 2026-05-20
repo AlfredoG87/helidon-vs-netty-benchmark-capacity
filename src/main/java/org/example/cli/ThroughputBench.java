@@ -3,6 +3,7 @@ package org.example.cli;
 
 import org.example.client.HelidonThroughputClient;
 import org.example.client.NettyThroughputClient;
+import org.example.client.StallTestRunner;
 import org.example.client.ThroughputClient;
 import org.example.logging.Logging;
 import org.example.server.HelidonThroughputServer;
@@ -27,6 +28,7 @@ public final class ThroughputBench {
         switch (mode) {
             case "server" -> runServer(args);
             case "client" -> runClient(args);
+            case "stall"  -> runStall(args);
             default -> usage();
         }
     }
@@ -96,16 +98,50 @@ public final class ThroughputBench {
         }
     }
 
+    private static void runStall(String[] args) throws Exception {
+        // stall <helidon|netty> <host> <msgs> <payloadKB>
+        // stall <host> <msgs> <payloadKB>               (backward compat — defaults to helidon)
+        if (args.length < 4) {
+            usage();
+            return;
+        }
+        String clientType;
+        String target;
+        int numMessages;
+        int payloadKB;
+
+        if ("helidon".equals(args[1]) || "netty".equals(args[1])) {
+            if (args.length < 5) {
+                usage();
+                return;
+            }
+            clientType = args[1];
+            target = args[2];
+            numMessages = Integer.parseInt(args[3]);
+            payloadKB = Integer.parseInt(args[4]);
+        } else {
+            clientType = "helidon";
+            target = args[1];
+            numMessages = Integer.parseInt(args[2]);
+            payloadKB = Integer.parseInt(args[3]);
+        }
+
+        String serverUrl = target.startsWith("http") ? target : "http://" + target;
+        StallTestRunner.run(clientType, serverUrl, numMessages, payloadKB);
+    }
+
     private static void usage() {
         System.out.println("""
                 Usage:
                   server <netty|helidon> <port>
                   client <netty|helidon> <host:port|url> <numMsg> <sizeKB>
+                  stall  <host:port|url> <numMsg> <payloadKB>
                 Examples:
                   ./gradlew run --args="server netty 9090"
                   ./gradlew run --args="server helidon 9090"
                   ./gradlew run --args="client netty localhost:9090 1000 64"
                   ./gradlew run --args="client helidon http://localhost:9090 1000 64"
+                  ./gradlew run --args="stall http://localhost:9090 100 4096"
                 """);
     }
 }

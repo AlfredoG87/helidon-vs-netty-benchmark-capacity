@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * <p>Tunable via system properties:
  * <ul>
  *   <li>{@code chaos.messages}  — messages per Job run (default 50)
- *   <li>{@code chaos.payloads}  — comma-separated payloadKB list (default 5,50,500)
+ *   <li>{@code chaos.payloads}  — comma-separated payloadKB list (default 5,50,500,1024,2048,4096,8192)
  * </ul>
  */
 @Tag("chaos")
@@ -76,7 +76,7 @@ class KindChaosIntegrationTest {
     // ── Matrix parameters (tunable via system properties) ────────────────────
 
     static final long NUM_MESSAGES = Long.getLong("chaos.messages", 50);
-    static final int[] PAYLOAD_KBS = parsePayloads(System.getProperty("chaos.payloads", "5,50,500"));
+    static final int[] PAYLOAD_KBS = parsePayloads(System.getProperty("chaos.payloads", "5,50,500,1024,2048,4096,8192"));
 
     // ── Cluster constants ────────────────────────────────────────────────────
 

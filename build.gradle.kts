@@ -69,14 +69,17 @@ tasks.test {
         if (!project.hasProperty("includeChaos")) {
             excludeTags("chaos")
         }
+        if (!project.hasProperty("includeStall")) {
+            excludeTags("stall")
+        }
     }
     testLogging {
         showStandardStreams = true
     }
-    // Forward chaos.* system properties set on the Gradle command line to the test JVM
+    // Forward chaos.*, stall.*, and runDefectTests system properties to the test JVM
     System.getProperties()
         .keys.map { it.toString() }
-        .filter { it.startsWith("chaos.") }
+        .filter { it.startsWith("chaos.") || it.startsWith("stall.") || it == "runDefectTests" }
         .forEach { key -> systemProperty(key, System.getProperty(key)) }
     minHeapSize = "1g"
     maxHeapSize = "4g"

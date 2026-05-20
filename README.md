@@ -1,8 +1,39 @@
-# Helidon vs Netty — gRPC Throughput Benchmark
+# Helidon vs Netty — gRPC Throughput & Stall-Connection Benchmark
 
-Compares gRPC bidirectional-streaming throughput between **Helidon 4.4.1** and **Netty 1.66.0** across four dimensions: server implementation, client implementation, payload size, and network chaos profile.
+This repository serves two purposes:
 
-Three test suites are provided, each building on the previous:
+1. **Throughput benchmark** — compares gRPC bidirectional-streaming throughput between
+   **Helidon 4.4.1** and **Netty 1.66.0** across server implementation, client implementation,
+   payload size, and network chaos profile.
+
+2. **Stall-connection bug reproduction** — characterises two distinct defects in Helidon 4.4.1
+   that cause gRPC streams to stall silently, with a complete 2×2 client/server matrix and
+   latency-profile analysis. Intended as a self-contained reproduction case for the Helidon team.
+
+---
+
+## Stall-Connection Bug Summary
+
+Two independent bugs were identified and reproduced in Helidon 4.4.1:
+
+| # | Trigger | Stall rate | Both clients? | Root cause hypothesis |
+|---|---------|:----------:|:-------------:|----------------------|
+| [Bug 1](docs/helidon-bug-1-frame-boundary-stall.md) | Messages 1 KB – 4090 KB | 1–5% (probabilistic) | Helidon client only | `BufferDataInputStream.read()` returns 0 at HTTP/2 frame boundaries; server swallows the exception |
+| [Bug 2](docs/helidon-bug-2-message-size-limit.md) | Messages ≥ 4096 KB | 100% (deterministic) | Both clients | `GrpcConfig.maxReadBufferSize()` does not propagate to gRPC-Java's `maxInboundMessageSize`; 4 MB default remains |
+
+In both cases the Helidon gRPC client's `StreamObserver` **never receives `onError` or
+`onCompleted`** — streams hang silently. `withDeadlineAfter` deadlines are also not
+delivered to the observer.
+
+**Detailed reproduction instructions and results:**
+- [Local JVM runs](docs/local-runs.md)
+- [Kubernetes (Kind) runs](docs/k8s-runs.md)
+
+---
+
+## Throughput Test Suites
+
+Three throughput test suites are provided, each building on the previous:
 
 | Suite | Where it runs | What it measures |
 |-------|--------------|------------------|
@@ -36,20 +67,30 @@ Three test suites are provided, each building on the previous:
 ## Project Layout
 
 ```
+├── docs/
+│   ├── local-runs.md                           — stall-test instructions + results (local JVM)
+│   ├── k8s-runs.md                             — stall-test instructions + results (Kind cluster)
+│   ├── helidon-bug-1-frame-boundary-stall.md   — bug report: probabilistic stall (1–5%)
+│   └── helidon-bug-2-message-size-limit.md     — bug report: deterministic stall ≥4096 KB
 ├── src/main/java/org/example/
-│   ├── cli/            ThroughputBench.java    — CLI entrypoint (server & client modes)
-│   ├── client/         NettyThroughputClient, HelidonThroughputClient, ClientRunner
+│   ├── cli/            ThroughputBench.java    — CLI entrypoint (server / client / stall modes)
+│   ├── client/         NettyThroughputClient, HelidonThroughputClient, StallTestRunner
 │   ├── server/         NettyThroughputServer, HelidonThroughputServer, ThroughputServiceImpl
 │   └── common/         Pretty.java             — console reporting helpers
 ├── src/test/java/org/example/benchmark/
+│   ├── — Stall-connection tests —
+│   ├── HelidonGrpcStallConnectionsTest.java    — Helidon server × {Helidon, Netty} client
+│   ├── NettyGrpcStallConnectionsTest.java      — Netty server × {Helidon, Netty} client (control)
+│   ├── KindStallConnectionsMatrixTest.java     — K8s 2×2 matrix under latency profiles
+│   ├── KindHelidonStallBugTest.java            — K8s Helidon-only stall rate vs latency
+│   ├── — Throughput tests —
 │   ├── AbstractThroughputMatrixTest.java       — shared 4×2×4 parameterised matrix
 │   ├── ThroughputIntegrationTest.java          — local JVM servers
 │   ├── DockerizedThroughputIntegrationTest.java — Docker container servers
 │   ├── KindThroughputIntegrationTest.java      — Kind cluster, port-forward client
 │   └── KindChaosIntegrationTest.java           — Kind cluster, in-cluster client, tc-netem chaos
 ├── docker/
-│   ├── Dockerfile                              — single image, server + client mode
-│   └── build.sh                               — convenience build script
+│   └── Dockerfile                              — single image, server + client + stall mode
 ├── k8s/
 │   ├── kind-config.yaml                        — 2-node cluster (control-plane + worker)
 │   ├── namespace.yaml                          — benchmark namespace

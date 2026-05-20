@@ -37,7 +37,11 @@ final class ClientRunner {
         AtomicLong lastTime = new AtomicLong(System.nanoTime());
         AtomicReference<Throwable> error = new AtomicReference<>();
 
-        int maxInFlight = Math.max(1, (int) Math.min(4, (32L * 1024 * 1024) / Math.max(1, sizeBytes)));
+        // Cap in-flight at 1 for messages >= 2 MB to avoid HTTP/2 connection-window exhaustion
+        // on implementations (e.g. Helidon) that don't auto-update the connection-level window.
+        int maxInFlight = sizeBytes >= 2 * 1024 * 1024
+                ? 1
+                : Math.max(1, (int) Math.min(4, (32L * 1024 * 1024) / Math.max(1, sizeBytes)));
         Semaphore inFlight = new Semaphore(maxInFlight);
 
         ScheduledExecutorService reporter = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -85,7 +89,10 @@ final class ClientRunner {
         });
 
         for (long i = 0; i < numMsg; i++) {
-            inFlight.acquire();
+            boolean acquired = inFlight.tryAcquire(30, TimeUnit.SECONDS);
+            if (!acquired) {
+                error.compareAndSet(null, new RuntimeException("No ack within 30s — server stalled"));
+            }
             Throwable err = error.get();
             if (err != null) {
                 inFlight.release();
